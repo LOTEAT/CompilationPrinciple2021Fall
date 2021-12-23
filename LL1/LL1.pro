@@ -17,13 +17,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     grammar.cpp \
+    ll1.cpp \
     main.cpp \
     mainwindow.cpp \
-    parse.cpp \
+    parser.cpp \
     utils.cpp
 
 HEADERS += \
     grammar.h \
+    ll1.h \
     mainwindow.h \
     parser.h \
     utils.h

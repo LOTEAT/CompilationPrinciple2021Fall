@@ -9,6 +9,7 @@
 #include <QMap>
 class Parser{
 private:
+    QString start;
     QString file_name;
     // Terminator
     QVector<QString> VT;
@@ -41,6 +42,7 @@ public:
     // Is it the best way to share data?
     // define friend class
     friend class Grammar;
+    friend class LL1;
 
 };
 

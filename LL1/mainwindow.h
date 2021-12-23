@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "grammar.h"
+#include "ll1.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -13,7 +14,7 @@ class MainWindow : public QMainWindow
 
 private:
     Grammar grammar;
-
+    LL1 ll1;
 
 public:
     MainWindow(QWidget *parent = nullptr);

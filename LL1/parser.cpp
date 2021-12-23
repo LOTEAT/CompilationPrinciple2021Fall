@@ -22,7 +22,7 @@ bool Parser::parse_file(){
     Utils::alert_message("upload", "ok!");
     /***********TODO*************/
 
-
+    bool flag = false;
     // open file
     if (ll1_file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -31,7 +31,11 @@ bool Parser::parse_file(){
             QString line = ll1_file.readLine();
             // remove '\n'
             line = line.trimmed();
-            parse_line(line);
+            if(flag)
+                parse_line(line);
+            else
+                start = line;
+            flag = true;
         }
         ll1_file.close();
     }
@@ -39,6 +43,7 @@ bool Parser::parse_file(){
     // remove duplicate vt
     std::sort(VN.begin(), VN.end());
     VN.erase(std::unique(VN.begin(), VN.end()), VN.end());
+    VT.push_back("#");
     return true;
 }
 

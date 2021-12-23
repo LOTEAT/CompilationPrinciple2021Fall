@@ -1,3 +1,9 @@
-Q->R b|b
-R->S a|a
-S->Q c|c
+E
+E->T E'
+E'->+ T E'
+E'->@
+T->F T'
+T'->* F T'
+T'->@
+F->( E )
+F->i

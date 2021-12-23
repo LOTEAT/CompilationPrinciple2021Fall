@@ -168,7 +168,6 @@ void Grammar::extract_left_common_factor(){
  */
 bool Grammar::add_first_set(QString left, QString right){
     QStringList right_split = right.split(" ");
-    qDebug() << "List" << right_split;
     int old_size = first[left].size();
     for(int i = 0, s = right_split.length(); i < s; i++){
         QString right_split_part = right_split[i];
@@ -206,7 +205,7 @@ bool Grammar::add_first_set(QString left, QString right){
 void Grammar::extract_first_set(){
     // TODO
     // There is a question here.
-    // the first set of G should contain "@"
+    // the first set of G should contain "@"?
     first["@"].insert("@");
 
     // non-terminator
@@ -221,11 +220,75 @@ void Grammar::extract_first_set(){
             }
         }
     }
+}
 
-    for(auto vn:parser.VN){
-        qDebug() << vn << first[vn];
+/**
+ * @brief Grammar::extract_candidate_first_set
+ */
+void Grammar::extract_candidate_first_set(){
+    for(auto vn: parser.VN){
+        for(auto it = parser.production[vn].begin(); it != parser.production[vn].end(); it++){
+            if(*it == "@")
+                continue;
+            QStringList candidate_list = it->split(" ");
+            for(int i = 0, s = candidate_list.length(); i < s; i++){
+                first_candidate[*it].unite(first[candidate_list[i]]);
+                if(!first[candidate_list[i]].contains("@")){
+                    if(first_candidate[*it].contains("@"))
+                        first_candidate[*it].remove("@");
+                    break;
+                }
+
+
+            }
+        }
     }
+}
 
+
+QSet<QString> Grammar::extract_first_set_parts(QStringList candidate_list, int start){
+    QSet<QString> first_set_parts;
+    for(int i = start, s = candidate_list.length(); i < s; i++){
+        first_set_parts.unite(first[candidate_list[i]]);
+        if(!first[candidate_list[i]].contains("@")){
+            if(first_set_parts.contains("@"))
+                first_candidate.remove("@");
+            break;
+        }
+    }
+    return first_set_parts;
+}
+
+
+/**
+ * @brief Grammar::add_follow_set add follow set for vn
+ * @param vn non-terminator
+ * @return whether follow[vn] changed
+ */
+bool Grammar::add_follow_set(QString vn){
+    int old_size = follow[vn].size();
+    for(auto left: parser.VN){
+        for(auto it = parser.production[left].begin(); it != parser.production[left].end(); it++){
+            QStringList candidate_list = it->split(" ");
+            for(int i = 0, s = candidate_list.length(); i < s; i++){
+                // match
+                if(candidate_list[i] == vn){
+                    if(i == s - 1)
+                       follow[vn].unite(follow[left]);
+                    else{
+                        QSet<QString> first_set_parts = extract_first_set_parts(candidate_list, i + 1);
+                        follow[vn].unite(first_set_parts);
+                        if(first_set_parts.contains("@"))
+                            follow[vn].unite(follow[left]);
+                    }
+                }
+            }
+        }
+    }
+    if(follow[vn].contains("@"))
+        follow[vn].remove("@");
+    int new_size = follow[vn].size();
+    return !(old_size == new_size);
 }
 
 
@@ -233,8 +296,18 @@ void Grammar::extract_first_set(){
  * @brief Grammar::extract_follow_set extract follow set
  */
 void Grammar::extract_follow_set(){
-
+    bool flag = true;
+    while(flag){
+        flag = false;
+        for(auto vn: parser.VN){
+            if(vn == parser.start)
+                follow[vn].insert("#");
+            flag = add_follow_set(vn) | flag;
+        }
+    }
 }
+
+
 
 
 

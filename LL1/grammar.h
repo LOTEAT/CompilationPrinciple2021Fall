@@ -8,8 +8,9 @@ class Grammar
 {
 private:
     Parser parser;
-    QMap<QString, QSet<QString>> first;
-    QMap<QString, QSet<QString>> follow;
+    QMap<QString, QSet<QString> > first;
+    QMap<QString, QSet<QString> > first_candidate;
+    QMap<QString, QSet<QString> > follow;
     // remove direct left recursion
     void remove_direct_left_recursion(QString left);
     // remove indirect left recursion
@@ -20,6 +21,10 @@ private:
     void left_common_for_one_production(QString vn);
     // add first set
     bool add_first_set(QString left, QString right);
+    // add follow set
+    bool add_follow_set(QString vn);
+    // extract first set of candidate parts
+    QSet<QString> extract_first_set_parts(QStringList candidate_list, int start);
 
 public:
     Grammar();
@@ -39,8 +44,12 @@ public:
     void extract_left_common_factor();
     // extract the first set
     void extract_first_set();
+    // extract the right part first set
+    void extract_candidate_first_set();
     // extract the follow set
     void extract_follow_set();
+
+    friend class LL1;
 };
 
 #endif // GRAMMAR_H
