@@ -78,10 +78,41 @@ void LL1::generate_ll1_analysis_table(){
         }
         for(auto vt: grammar.parser.VT){
             if(ll1_table.find(qMakePair(vn, vt)) == ll1_table.end())
-                ll1_table[qMakePair(vn, vt)] = "null";
+                ll1_table[qMakePair(vn, vt)] = "error";
         }
     }
 
-    for(auto it=ll1_table.begin(); it!=ll1_table.end(); it++)
-        qDebug() << it.key() << " " << it.value();
+}
+
+
+void LL1::parse(QString input){
+    analysis.push("#");
+    analysis.push(grammar.parser.start);
+    if(!input.contains('#'))
+        input.push_back(" #");
+    QStringList input_list = input.split(" ");
+    int cur = 0;
+    bool flag = false;
+    while(analysis.top() != "#"){
+        QString top = analysis.pop();
+        if(grammar.parser.VT.contains(top)){
+            cur++;
+            continue;
+        }
+        auto table_ij = qMakePair(top, input_list[cur]);
+        QString production = ll1_table[table_ij];
+        if(production == "error"){
+            flag = true;
+            break;
+        }
+        qDebug() << production;
+        if(production.contains("@"))
+            continue;
+        QStringList left_right = production.split("->");
+        QStringList right = left_right[1].split(" ");
+        for(int i = right.length() - 1; i >= 0; i--)
+            analysis.push(right[i]);
+    }
+    if(flag)
+        qDebug() << "error";
 }

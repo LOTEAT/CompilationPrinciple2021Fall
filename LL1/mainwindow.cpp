@@ -26,4 +26,5 @@ void MainWindow::on_upload_clicked()
     grammar.extract_follow_set();
     ll1.set_grammar(grammar);
     ll1.generate_ll1_analysis_table();
+    ll1.parse("+ i");
 }
