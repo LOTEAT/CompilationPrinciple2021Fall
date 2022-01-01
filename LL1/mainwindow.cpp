@@ -25,6 +25,7 @@ void MainWindow::on_upload_clicked()
     qDebug() << "-----------";
     grammar.extract_follow_set();
     ll1.set_grammar(grammar);
-    ll1.generate_ll1_analysis_table();
-    ll1.parse("+ i");
+    ll1.recursive_descent("i + i * i");
+    //ll1.generate_ll1_analysis_table();
+    //ll1.parse("i + i * i");
 }

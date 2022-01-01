@@ -3,13 +3,24 @@
 
 #include "grammar.h"
 #include <QStack>
+struct GrammarTree{
+    QString node = "";
+    QVector<GrammarTree*> next_node;
+    GrammarTree(QString node_val): node(node_val){}
+    GrammarTree(){}
+};
+
 class LL1
 {
 private:
     Grammar grammar;
+    GrammarTree* recursive_descent_tree = new GrammarTree;
+    GrammarTree* ll1_tree = new GrammarTree;
     QVector<QString> production_in_derive;
     QMap<QPair<QString, QString>, QString> ll1_table;
     QStack<QString> analysis;
+    void print_right_first(GrammarTree* current_node);
+    void print_left_first(GrammarTree* current_node);
     int parse_index;
     bool is_parse_success;
 public:
@@ -20,7 +31,7 @@ public:
     // set grammar
     void set_grammar(Grammar grammar);
     // sub program
-    void sub_program(QString vn, QStringList input_list);
+    void sub_program(QString vn, QStringList input_list, GrammarTree* current_node);
     // recursive descent algorithm
     bool recursive_descent(QString str);
     // generate ll1 analysis table
