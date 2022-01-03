@@ -16,7 +16,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    analysistable.cpp \
+    display.cpp \
     grammar.cpp \
+    inputlist.cpp \
+    inputlistitem.cpp \
     ll1.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -24,7 +28,11 @@ SOURCES += \
     utils.cpp
 
 HEADERS += \
+    analysistable.h \
+    display.h \
     grammar.h \
+    inputlist.h \
+    inputlistitem.h \
     ll1.h \
     mainwindow.h \
     parser.h \
@@ -37,3 +45,8 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    pic.qrc
+
+

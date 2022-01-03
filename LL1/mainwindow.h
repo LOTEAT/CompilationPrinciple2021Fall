@@ -2,28 +2,40 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "grammar.h"
-#include "ll1.h"
-QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
-QT_END_NAMESPACE
+#include <QLabel>
+#include <QVBoxLayout>
+#include <QComboBox>
+#include <QListWidget>
+#include <QTableWidget>
+#include <QPushButton>
+#include <QLineEdit>
+#include "display.h"
+
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-private:
-    Grammar grammar;
-    LL1 ll1;
-
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
-private slots:
-    void on_upload_clicked();
-
+public slots:
+    void experimentChanged(int index);
+    void clickImportBtn();
+    void clickConfirmBtn();
 private:
-    Ui::MainWindow *ui;
+    QString file_name = "";
+    QLabel* title;
+    QLabel* author;
+    QLabel* experimentTitle;
+    QLabel* inputString;
+    QPushButton* importBtn;
+    QPushButton* confirmBtn;
+    QPushButton* pictureBtn;
+    QLineEdit* inputStringEdit;
+    QFrame* horizontalLine;
+    QComboBox* experimentSelect;
+    Display* display;
+
 };
 #endif // MAINWINDOW_H
