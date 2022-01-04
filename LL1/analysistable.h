@@ -1,4 +1,4 @@
-#ifndef ANALYSISTABLE_H
+﻿#ifndef ANALYSISTABLE_H
 #define ANALYSISTABLE_H
 
 #include <QWidget>
@@ -7,6 +7,7 @@
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QHeaderView>
 
 class AnalysisTable: public QWidget
 {
@@ -15,6 +16,7 @@ public:
     AnalysisTable(QWidget* parent = nullptr);
     void setHidden(bool b) {setMaximumWidth(b ? 0 : QWIDGETSIZE_MAX);}
     void setControl(bool b) {controlWidget->setMaximumHeight(b ? QWIDGETSIZE_MAX : 0);}
+    void setRow(QString row);
 public slots:
     void addRow();
     void addCol();

@@ -32,6 +32,7 @@ void InputList::clickAddItem()
     insertItem(count() - 1, item);
     item->setWhatsThis(QString::number(curId));
     InputListItem* w = new InputListItem(curId++);
+    productions.push_back(w);
     setItemWidget(item, w);
 }
 
@@ -42,6 +43,7 @@ void InputList::deleteById(int id)
         if(item(i)->whatsThis() == idString)
         {
             takeItem(i);
+            productions.erase(productions.begin() + i);
             break;
         }
 }
@@ -55,10 +57,13 @@ void InputList::addInputItem(QString left, QString right)
     InputListItem* w = new InputListItem(curId++);
     w->setItem(left, right);
     setItemWidget(item, w);
+    productions.push_back(w);
 }
 
-void InputList::getInput(){
-    for(int i = 0; i < count(); i++){
-        qDebug() << item(i)->whatsThis();
+QStringList InputList::getInput(){
+    QStringList production_list;
+    for(auto production : productions){
+        production_list.push_back(production->getItem());
     }
+    return production_list;
 }

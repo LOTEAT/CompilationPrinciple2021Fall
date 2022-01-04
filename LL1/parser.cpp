@@ -47,6 +47,18 @@ bool Parser::parse_file(){
     return true;
 }
 
+void Parser::parse_input(QStringList input_list, QString start){
+    this->start = start;
+    for(auto line: input_list){
+        parse_line(line);
+    }
+    add_VT();
+    // remove duplicate vt
+    std::sort(VN.begin(), VN.end());
+    VN.erase(std::unique(VN.begin(), VN.end()), VN.end());
+    VT.push_back("#");
+}
+
 /**
  * @brief Parser::set_file_name set file name
  * @param input_file_name input file

@@ -45,7 +45,7 @@ void Grammar::parse_file(){
  * @brief Grammar::parse_input parse gui input
  */
 void Grammar::parse_input(){
-    parser.parse_input();
+
 }
 
 
@@ -79,7 +79,15 @@ void Grammar::remove_direct_left_recursion(QString VN){
 /**
  * @brief Grammar::remove_left_recursion remove left recursion
  */
-void Grammar::remove_left_recursion(){
+QStringList Grammar::remove_left_recursion(){    
+    for(auto vn: parser.VN){
+        for(auto it = parser.production[vn].begin(); it != parser.production[vn].end(); it++){
+            if(it->startsWith(vn)){
+                remove_direct_left_recursion(vn);
+                break;
+            }
+        }
+    }
     remove_indirect_left_recursion();
     for(auto vn: parser.VN){
         for(auto it = parser.production[vn].begin(); it != parser.production[vn].end(); it++){
@@ -90,25 +98,70 @@ void Grammar::remove_left_recursion(){
         }
     }
     remove_useless_production();
+    QStringList productions;
     for(auto vn: parser.VN){
-        qDebug()<< vn << parser.production[vn];
+        for(auto candidate: parser.production[vn]){
+            QString production = vn + "->" + candidate + "\n";
+            production.replace(" ", "");
+            productions.push_back(production);
+        }
     }
+    return productions;
 }
+
+/**
+ * @brief Grammar::indirect_left_recursion_check
+ * @return check whether it is need to remove indirect left recursion
+ */
+bool Grammar::indirect_left_recursion_check(){
+    QMap<QString, QVector<QString> > production_temp = parser.production;
+    for(int i = 0; i < parser.VN.length(); i++){
+        QString vn_i = parser.VN[i];
+        for(int j = 0; j < i; j++){
+            QVector<QString> new_rights;
+            QString vn_j = parser.VN[j];
+            for(auto it_i = production_temp[vn_i].begin(); it_i != production_temp[vn_i].end(); it_i++){
+                if(it_i->startsWith(vn_j)){
+                    for(auto it_j = production_temp[vn_j].begin(); it_j != production_temp[vn_j].end(); it_j++){
+                        QStringList rights = it_j->split(" ");
+                        new_rights.push_back(*it_j + it_i->mid(vn_j.length()));
+                    }
+                }
+                else
+                    new_rights.push_back(*it_i);
+            }
+            production_temp[vn_i] = new_rights;
+        }
+    }
+
+    for(auto vn : parser.VN){
+        QVector<QString> candidates = production_temp[vn];
+        for(auto candidate: candidates){
+            if(candidate.startsWith(vn))
+                return true;
+        }
+    }
+    return false;
+}
+
 
 /**
  * @brief Grammar::remove_indirect_left_recursion
  */
 void Grammar::remove_indirect_left_recursion(){
+    if(!indirect_left_recursion_check())
+        return;
     for(int i = 0; i < parser.VN.length(); i++){
         QString vn_i = parser.VN[i];
-        qDebug() << vn_i;
         for(int j = 0; j < i; j++){
             QVector<QString> new_rights;
             QString vn_j = parser.VN[j];
             for(auto it_i = parser.production[vn_i].begin(); it_i != parser.production[vn_i].end(); it_i++){
                 if(it_i->startsWith(vn_j)){
-                    for(auto it_j = parser.production[vn_j].begin(); it_j != parser.production[vn_j].end(); it_j++)
+                    for(auto it_j = parser.production[vn_j].begin(); it_j != parser.production[vn_j].end(); it_j++){
+                        QStringList rights = it_j->split(" ");
                         new_rights.push_back(*it_j + it_i->mid(vn_j.length()));
+                    }
                 }
                 else
                     new_rights.push_back(*it_i);
@@ -202,7 +255,7 @@ bool Grammar::add_first_set(QString left, QString right){
 /**
  * @brief Grammar::extract_first_set get first set
  */
-void Grammar::extract_first_set(){
+QStringList Grammar::extract_first_set(){
     // TODO
     // There is a question here.
     // the first set of G should contain "@"?
@@ -220,12 +273,21 @@ void Grammar::extract_first_set(){
             }
         }
     }
+
+    QStringList first_set;
+    for(auto vn: parser.VN){
+        QString f = "First(" + vn + ")=";
+        f = f + "{" + first[vn].values().join(',') + "}\n";
+        f.replace(" ", "");
+        first_set.push_back(f);
+    }
+    return first_set;
 }
 
 /**
  * @brief Grammar::extract_candidate_first_set
  */
-void Grammar::extract_candidate_first_set(){
+QStringList Grammar::extract_candidate_first_set(){
     for(auto vn: parser.VN){
         for(auto it = parser.production[vn].begin(); it != parser.production[vn].end(); it++){
             if(*it == "@")
@@ -243,6 +305,20 @@ void Grammar::extract_candidate_first_set(){
             }
         }
     }
+
+
+    QStringList first_candidate_set;
+    for(auto vn: parser.VN){
+        for(auto it = parser.production[vn].begin(); it != parser.production[vn].end(); it++){
+            if(*it == "@")
+                continue;
+            QString f = "First(" + *it + ")=";
+            f = f + "{" + first_candidate[*it].values().join(',') + "}\n";
+            f.replace(" ", "");
+            first_candidate_set.push_back(f);
+        }
+    }
+    return first_candidate_set;
 }
 
 
@@ -295,7 +371,7 @@ bool Grammar::add_follow_set(QString vn){
 /**
  * @brief Grammar::extract_follow_set extract follow set
  */
-void Grammar::extract_follow_set(){
+QStringList Grammar::extract_follow_set(){
     bool flag = true;
     while(flag){
         flag = false;
@@ -305,6 +381,15 @@ void Grammar::extract_follow_set(){
             flag = add_follow_set(vn) | flag;
         }
     }
+    QStringList follow_set;
+    qDebug() << follow;
+    for(auto vn: parser.VN){
+        QString f = "Follow(" + vn + ")=";
+        f = f + "{" + follow[vn].values().join(',') + "}\n";
+        f.replace(" ", "");
+        follow_set.push_back(f);
+    }
+    return follow_set;
 }
 
 

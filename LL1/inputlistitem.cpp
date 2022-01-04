@@ -42,4 +42,7 @@ void InputListItem::clickDeleteBtn()
     static_cast<InputList*>(parent()->parent())->deleteById(id);
 }
 
+QString InputListItem::getItem(){
+    return leftText->text() + "->" + rightText->text();
+}
 

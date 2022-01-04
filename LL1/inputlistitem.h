@@ -13,6 +13,7 @@ class InputListItem: public QWidget
 public:
     InputListItem(int id, QWidget* parent = nullptr);
     void setItem(QString left, QString right);
+    QString getItem();
 public slots:
     void clickDeleteBtn();
 private:

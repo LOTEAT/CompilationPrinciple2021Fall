@@ -1,10 +1,10 @@
-#include "analysistable.h"
-
+﻿#include "analysistable.h"
+#include <QDebug>
 AnalysisTable::AnalysisTable(QWidget *parent):QWidget(parent)
 {
     table = new QTableWidget();
-    rowLabel = new QLabel(QString::fromUtf8("行:"));
-    colLabel = new QLabel("列:");
+    rowLabel = new QLabel(QString::fromLocal8Bit("行:"));
+    colLabel = new QLabel(QString::fromLocal8Bit("列:"));
     addRowBtn = new QPushButton();
     addRowBtn->setFlat(true);
     addRowBtn->setIcon(QIcon(":/pic/add.png"));
@@ -72,4 +72,22 @@ void AnalysisTable::subCol()
 {
     if(table->columnCount())
         table->removeColumn(table->columnCount() - 1);
+}
+
+
+
+
+
+void AnalysisTable::setRow(QString row){
+    table->verticalHeader()->setVisible(false);
+    table->horizontalHeader()->setVisible(false);
+    QStringList row_split = row.split(",");
+    table->insertRow(table->rowCount());
+    int r = table->rowCount() - 1;
+    while(table->columnCount() < row_split.length() - 1)
+        table->insertColumn(table->columnCount());
+    for(int i = 0; i < row_split.length(); i++){
+        if(row_split[i] != "@")
+            table->setItem(r, i, new QTableWidgetItem(row_split[i]));
+    }
 }

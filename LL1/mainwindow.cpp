@@ -141,7 +141,7 @@ void MainWindow::experimentChanged(int index)
 }
 
 void MainWindow::clickImportBtn(){
-    this->file_name = QFileDialog::getOpenFileName(this, "Open file","G:/programs/QT/compile/LL1","Text files (*.txt)");
+    this->file_name = QFileDialog::getOpenFileName(this, "Open file","G:/programs/QT/compile/LL1/test","Text files (*.txt)");
     QFile ll1_file(file_name);
 
     /***********TODO*************/
@@ -169,6 +169,6 @@ void MainWindow::clickImportBtn(){
 
 void MainWindow::clickConfirmBtn(){
     int id = experimentSelect->currentIndex();
-    display->showOutput(id);
+    display->showOutput(id, inputStringEdit->text());
 }
 

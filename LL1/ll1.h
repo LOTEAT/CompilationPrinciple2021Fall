@@ -16,7 +16,8 @@ private:
     Grammar grammar;
     GrammarTree* recursive_descent_tree = new GrammarTree;
     GrammarTree* ll1_tree = new GrammarTree;
-    QVector<QString> production_in_derive;
+    QStringList recursive_descent_productions;
+    QStringList ll1_productions;
     QMap<QPair<QString, QString>, QString> ll1_table;
     QStack<QString> analysis;
     void print_right_first(GrammarTree* current_node);
@@ -36,8 +37,18 @@ public:
     bool recursive_descent(QString str);
     // generate ll1 analysis table
     void generate_ll1_analysis_table();
+    // get ll1 table
+    QStringList get_ll1_table();
     // LL1 parser
     void parse(QString input);
+    // get productions in recursive decent
+    QStringList get_recursive_descent_productions(){
+        return recursive_descent_productions;
+    }
+    // get productions in ll1
+    QStringList get_ll1_productions(){
+        return ll1_productions;
+    }
 
 };
 

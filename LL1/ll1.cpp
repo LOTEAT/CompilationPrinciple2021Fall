@@ -17,7 +17,7 @@ void LL1::set_grammar(Grammar grammar){
 void LL1::sub_program(QString left, QStringList input_list, GrammarTree* current_node){
     if(parse_index == input_list.length()){
         if(grammar.first[left].contains("@")){
-            qDebug() << left << "->" << "@";
+            recursive_descent_productions.push_back(left + "->@\n");
             current_node->next_node.push_back(new GrammarTree("@"));
         }
         else
@@ -32,7 +32,8 @@ void LL1::sub_program(QString left, QStringList input_list, GrammarTree* current
     for(auto candidate: grammar.parser.production[left]){
         if(grammar.first_candidate[candidate].contains(input_list[parse_index])){
             flag = false;
-            qDebug() << left << "->" << candidate;
+            QString p = left + "->" + candidate + "\n";
+            recursive_descent_productions.push_back(p.replace(" ", ""));
             QStringList right_list = candidate.split(" ");
             for(auto right_part: right_list){
                 if(grammar.parser.VT.contains(right_part) && right_part == input_list[parse_index]){
@@ -49,7 +50,7 @@ void LL1::sub_program(QString left, QStringList input_list, GrammarTree* current
         }
     }
     if(grammar.first[left].contains("@") && (parse_index == input_list.length() || grammar.follow[left].contains(input_list[parse_index])) && flag){
-        qDebug() << left << "->" << "@";
+        recursive_descent_productions.push_back(left + "->@\n");
         current_node->next_node.push_back(new GrammarTree("@"));
     }
 }
@@ -65,9 +66,12 @@ bool LL1::recursive_descent(QString str){
     is_parse_success = true;
     recursive_descent_tree->node = grammar.parser.start;
     sub_program(grammar.parser.start, input_list, recursive_descent_tree);
-    print_left_first(recursive_descent_tree);
+    // print_left_first(recursive_descent_tree);
     return is_parse_success && parse_index == input_list.length();
 }
+
+
+
 
 /**
  * @brief LL1::generate_ll1_analysis_table generate_ll1_analysis_table
@@ -95,6 +99,22 @@ void LL1::generate_ll1_analysis_table(){
 }
 
 
+
+QStringList LL1::get_ll1_table(){
+    QStringList table;
+    QString vt_row = "vn/vt," + grammar.parser.VT.toList().join(",");
+    table.push_back(vt_row);
+    for(auto vn: grammar.parser.VN){
+        QString vn_row = vn;
+        for(auto vt: grammar.parser.VT){
+            vn_row += "," + ll1_table[qMakePair(vn, vt)];
+        }
+        table.push_back(vn_row);
+    }
+    return table;
+}
+
+
 void LL1::parse(QString input){
 
     // analysis stack
@@ -114,7 +134,7 @@ void LL1::parse(QString input){
         // pop
         QString top = analysis.pop();
         GrammarTree* current_node = tree.pop();
-
+        qDebug() << top;
         if(grammar.parser.VT.contains(top)){
             cur++;
             continue;
@@ -125,6 +145,8 @@ void LL1::parse(QString input){
             flag = true;
             break;
         }
+        QString p = production;
+        ll1_productions.push_back(p.replace(" ", "") + "\n");
         if(production.contains("@")){
             current_node->next_node.push_back(new GrammarTree("@"));
             continue;
@@ -140,7 +162,7 @@ void LL1::parse(QString input){
     }
     if(flag)
         qDebug() << "error";
-    print_right_first(ll1_tree);
+    // print_right_first(ll1_tree);
 }
 
 void LL1::print_right_first(GrammarTree* current_node){

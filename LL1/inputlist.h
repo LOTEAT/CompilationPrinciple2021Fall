@@ -7,6 +7,7 @@
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QAbstractItemView>
+#include <QVector>
 #include "inputlistitem.h"
 
 
@@ -18,10 +19,11 @@ public:
     void setHidden(bool b) {setMaximumWidth(b ? 0 : QWIDGETSIZE_MAX);}
     void deleteById(int id);
     void addInputItem(QString left, QString right);
-    void getInput();
+    QStringList getInput();
 public slots:
     void clickAddItem();
 private:
+    QVector<InputListItem*> productions;
     void initAddItem();
     int curId = 0;
     QPushButton* addBtn;

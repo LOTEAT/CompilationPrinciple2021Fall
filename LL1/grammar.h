@@ -25,6 +25,8 @@ private:
     bool add_follow_set(QString vn);
     // extract first set of candidate parts
     QSet<QString> extract_first_set_parts(QStringList candidate_list, int start);
+    // check
+    bool indirect_left_recursion_check();
 
 public:
     Grammar();
@@ -37,17 +39,17 @@ public:
     // parse input
     void parse_input();
     // remove left recursion
-    void remove_left_recursion();
+    QStringList remove_left_recursion();
     // remove useless production
     void remove_useless_production();
     // extract the left common factor
     void extract_left_common_factor();
     // extract the first set
-    void extract_first_set();
+    QStringList extract_first_set();
     // extract the right part first set
-    void extract_candidate_first_set();
+    QStringList extract_candidate_first_set();
     // extract the follow set
-    void extract_follow_set();
+    QStringList extract_follow_set();
 
     friend class LL1;
 };

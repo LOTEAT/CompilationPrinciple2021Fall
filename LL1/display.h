@@ -6,6 +6,7 @@
 #include <QTableWidget>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QPlainTextEdit>
 #include "inputlist.h"
 #include "analysistable.h"
 #include "parser.h"
@@ -20,16 +21,20 @@ public:
     void setText(const QString& input, const QString& table, const QString& output);
     void addInputItem(QString left, QString right);
     void removeLeftRecursion();
-    void showOutput(int id);
+    void extractLeftCommonFactor();
+    void extractFirstSet();
+    void extractFollowSet();
+    void recursiveDescent(QString sentence);
+    void showOutput(int id, QString sentence);
+    void showAnalysisTable(QString sentence);
+    void ll1_parse(QString sentence);
+    Parser initParser();
 private:
     QLabel* inputTitle;
     QLabel* tableTitle;
     QLabel* outputTitle;
-    Parser* parser;
-    Grammar* grammar;
-    LL1* ll1;
     InputList* inputList;
-    QListWidget* outputList;
+    QPlainTextEdit* outputList;
     AnalysisTable* analysisTable;
 };
 
