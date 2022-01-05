@@ -20,8 +20,8 @@ private:
     QStringList ll1_productions;
     QMap<QPair<QString, QString>, QString> ll1_table;
     QStack<QString> analysis;
-    void print_right_first(GrammarTree* current_node);
-    void print_left_first(GrammarTree* current_node);
+    void tranverse_right_first(GrammarTree* current_node);
+    void tranverse_left_first(GrammarTree* current_node);
     int parse_index;
     bool is_parse_success;
 public:
@@ -49,6 +49,8 @@ public:
     QStringList get_ll1_productions(){
         return ll1_productions;
     }
+    // generage grammar tree
+    void generate_grammar_tree(QString type);
 
 };
 

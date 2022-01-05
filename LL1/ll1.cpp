@@ -1,5 +1,6 @@
 ﻿#include "ll1.h"
-
+#include <QFile>
+#include <QQueue>
 /**
  * @brief LL1::set_grammar set grammar
  * @param grammar grammar
@@ -163,23 +164,80 @@ void LL1::parse(QString input){
     if(flag)
         qDebug() << "error";
     // print_right_first(ll1_tree);
+    generate_grammar_tree("ll1");
 }
 
-void LL1::print_right_first(GrammarTree* current_node){
+void LL1::tranverse_right_first(GrammarTree* current_node){
     qDebug() << current_node->node;
     if(current_node->next_node.empty())
         return;
     for(int i = current_node->next_node.length() - 1; i >= 0; i--){
-        print_right_first(current_node->next_node[i]);
+        tranverse_right_first(current_node->next_node[i]);
     }
 }
 
 
-void LL1::print_left_first(GrammarTree* current_node){
+void LL1::tranverse_left_first(GrammarTree* current_node){
     qDebug() << current_node->node;
     if(current_node->next_node.empty())
         return;
     for(int i = 0; i < current_node->next_node.length(); i++){
-        print_left_first(current_node->next_node[i]);
+        tranverse_left_first(current_node->next_node[i]);
     }
 }
+
+
+void LL1::generate_grammar_tree(QString type){
+    QQueue<GrammarTree*> tree;
+    QString tree_dot = "graph{\n";
+    QMap<QString, int> tree_map;
+    int num = 1;
+    if(type == "ll1"){
+        tree.push_back(ll1_tree);
+        while(!tree.empty()){
+            auto top = tree.front();
+            tree.pop_front();
+            if(tree_map[top->node] == 0){
+                tree_dot += QString::number(num) + "[label=\"" + top->node + "\"];\n";
+                tree_map[top->node] = num++;
+            }
+            for(int i = top->next_node.length() - 1; i >= 0; i--){
+                tree.push_back(top->next_node[i]);
+                tree_dot += QString::number(num) + "[label=\"" + top->next_node[i]->node + "\"];\n";
+                tree_dot += QString::number(tree_map[top->node]) + "--" + QString::number(num) + ";\n";
+                tree_map[top->next_node[i]->node] = num++;
+            }
+        }
+    }
+    else{
+        tree.push_back(recursive_descent_tree);
+        while(!tree.empty()){
+            auto top = tree.front();
+            tree.pop_front();
+            if(tree_map[top->node] == 0){
+                tree_dot += QString::number(num) + "[label=\"" + top->node + "\";\n";
+                tree_map[top->node] = num++;
+            }
+            for(int i = top->next_node.length() - 1; i >= 0; i--){
+                tree.push_back(top->next_node[i]);
+                tree_dot += QString::number(num) + "[label=\"" + top->next_node[i]->node + "\"];\n";
+                tree_dot += QString::number(tree_map[top->node]) + "--" + QString::number(num) + ";\n";
+                tree_map[top->node] = num++;
+            }
+        }
+    }
+    tree_dot += "}";
+
+    QFile file("G:\\programs\\QT\\compile\\build-LL1-Desktop_Qt_5_9_9_MSVC2017_64bit-Debug\\debug\\dot\\result.dot");
+    if(file.open(QFile::WriteOnly | QFile::Truncate))
+    {
+        qDebug() << 666;
+        QTextStream out(&file);  //创建写入流
+        out << tree_dot;
+    }
+    file.close();
+    system("dot ./dot/result.dot -T png -o result.png");
+    qDebug() << tree_dot;
+}
+
+

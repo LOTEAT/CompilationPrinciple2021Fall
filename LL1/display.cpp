@@ -132,6 +132,7 @@ void Display::showAnalysisTable(QString sentence){
 void Display::ll1_parse(QString sentence){
     Grammar grammar;
     grammar.set_parser(initParser());
+    grammar.remove_left_recursion();
     grammar.extract_first_set();
     grammar.extract_candidate_first_set();
     grammar.extract_follow_set();
