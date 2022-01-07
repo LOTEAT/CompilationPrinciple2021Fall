@@ -3,7 +3,10 @@
 
 #include <QSet>
 #include <QMap>
+#include <QStack>
 #include "parser.h"
+#include "treenode.h"
+#include "production.h"
 class Grammar
 {
 private:
@@ -11,6 +14,8 @@ private:
     QMap<QString, QSet<QString> > first;
     QMap<QString, QSet<QString> > first_candidate;
     QMap<QString, QSet<QString> > follow;
+    QStack<QString> expected_used;
+    QMap<QString,bool> used_vn;
     // remove direct left recursion
     void remove_direct_left_recursion(QString left);
     // remove indirect left recursion
@@ -27,6 +32,8 @@ private:
     QSet<QString> extract_first_set_parts(QStringList candidate_list, int start);
     // check
     bool indirect_left_recursion_check();
+    // search useless production
+    void search_useless_production(QString vn);
 
 public:
     Grammar();
@@ -43,7 +50,7 @@ public:
     // remove useless production
     void remove_useless_production();
     // extract the left common factor
-    void extract_left_common_factor();
+    QStringList extract_left_common_factor();
     // extract the first set
     QStringList extract_first_set();
     // extract the right part first set

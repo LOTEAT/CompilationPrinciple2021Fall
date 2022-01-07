@@ -1,5 +1,5 @@
 ﻿#include "grammar.h"
-
+#include <QStack>
 /**
  * @brief Grammar::Grammar non-arg constructor
  */
@@ -106,6 +106,9 @@ QStringList Grammar::remove_left_recursion(){
             productions.push_back(production);
         }
     }
+
+
+
     return productions;
 }
 
@@ -173,10 +176,59 @@ void Grammar::remove_indirect_left_recursion(){
 }
 
 
-/****TODO*****/
-void Grammar::remove_useless_production(){
-    qDebug() << "remove";
+
+
+void Grammar::search_useless_production(QString vn){
+    used_vn[vn]=true;            //该非终结符的产生式有用
+    for(auto right : parser.production[vn]){
+        QStringList right_split = right.split(" ");
+        for (auto i : right_split){
+            if(i==" ")continue; //空格跳过
+            bool find=false;    //是否是非终结符
+            for(auto v : parser.VN){
+                if (v==i){
+                   find=true;
+                }
+            }
+            if(!find){
+            }else{
+
+                if(used_vn[i]==false){
+                    expected_used.push(i);
+                }
+                used_vn[i]=true;
+            }
+        }
+    }
+    if(expected_used.size()==0)return;
+    QString next=expected_used.pop();
+    search_useless_production(next);
 }
+
+
+void Grammar::remove_useless_production(){
+    qDebug()<<parser.VN;
+    for (auto i : parser.VN){
+        used_vn.insert(i,false);
+    }
+    search_useless_production(parser.start);
+    for(auto i :used_vn){
+
+    }
+    for (auto vn:parser.VN){
+        if(used_vn[vn]==false){
+            QMap<QString,QVector<QString>>::Iterator i;
+            for(i=parser.production.begin();i!=parser.production.end();++i){
+                if(i.key()==vn){
+                    parser.production.erase(i);
+                }
+            }
+        }
+    }
+    qDebug() << "";
+}
+
+
 
 /**
  * @brief Grammar::min_prefix extract minimum left factor
@@ -195,22 +247,68 @@ QString Grammar::min_prefix(QString str1, QString str2){
 
 
 void Grammar::left_common_for_one_production(QString vn){
-    int number = 0;
-    bool flag = true;
-    while(flag){
-        flag = false;
-        for(int i = 0, s = parser.production[vn].length(); i < s; i++){
-            for(int j = 0; j < s; j++){
-                qDebug() << "";
-            }
+    int newNodeCount=0;
+    qDebug()<<vn<<" "<<parser.production[vn]<<" ";
+    QList<Production> productions;
+    for (auto right : parser.production[vn]){
+        QList<QString> nodeList;
+        QStringList right_split = right.split(" ");
+        for (auto i : right_split){
+            nodeList.append(i);
         }
+
+        Production produc(vn,nodeList);
+        productions.push_back(produc);
     }
+
+    TreeNode root(vn);
+
+
+    for(auto production:productions){
+        root.addProductionToTreePath(production);
+    }
+
+
+
+    QList<Production> newProductionList;
+    root.extractLeftCommonFactor(newProductionList,newNodeCount);
+
+
+
+    QMap<QString,QVector<QString>>newProductions;
+    if(parser.production[vn].length() != 1)
+        parser.production[vn].clear();
+
+    for(auto newProduction:newProductionList){
+        QString left = newProduction.getLeft();
+        QString right = newProduction.getRight().join(" ");
+        if(parser.VN.contains(left))
+            parser.production[left].push_back(right);
+        else{
+            parser.VN.push_back(left);
+            parser.production[left].push_back(right);
+        }
+
+    }
+
 }
 
-void Grammar::extract_left_common_factor(){
+QStringList Grammar::extract_left_common_factor(){
     for(auto vn: parser.VN){
         left_common_for_one_production(vn);
     }
+    QStringList productions;
+    for(auto vn: parser.VN){
+        for(auto candidate: parser.production[vn]){
+            QString production = vn + "->" + candidate + "\n";
+            production.replace(" ", "");
+            productions.push_back(production);
+        }
+    }
+
+
+
+    return productions;
 }
 
 /**

@@ -53,8 +53,9 @@ void Display::addInputItem(QString left, QString right){
 
 Parser Display::initParser(){
     QStringList input_list = inputList->getInput();
+    QString str=QString(input_list[0][0]);  //默认第一个字符为起始符
     Parser parser;
-    parser.parse_input(input_list);
+    parser.parse_input(input_list,str);
     return parser;
 }
 
@@ -69,6 +70,13 @@ void Display::removeLeftRecursion(){
 
 
 void Display::extractLeftCommonFactor(){
+    Grammar grammar;
+    grammar.set_parser(initParser());
+    QStringList productions = grammar.extract_left_common_factor();
+    for(auto production: productions){
+        outputList->insertPlainText(production);
+    }
+
 }
 
 void Display::extractFirstSet(){
@@ -133,6 +141,7 @@ void Display::ll1_parse(QString sentence){
     Grammar grammar;
     grammar.set_parser(initParser());
     grammar.remove_left_recursion();
+    grammar.extract_left_common_factor();
     grammar.extract_first_set();
     grammar.extract_candidate_first_set();
     grammar.extract_follow_set();

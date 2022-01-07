@@ -25,7 +25,8 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     parser.cpp \
-    utils.cpp
+    utils.cpp \
+    treenode.cpp
 
 HEADERS += \
     analysistable.h \
@@ -36,7 +37,9 @@ HEADERS += \
     ll1.h \
     mainwindow.h \
     parser.h \
-    utils.h
+    utils.h \
+    treenode.h \
+    production.h
 
 FORMS += \
     mainwindow.ui
