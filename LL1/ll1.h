@@ -40,7 +40,7 @@ public:
     // get ll1 table
     QStringList get_ll1_table();
     // LL1 parser
-    void parse(QString input);
+    bool parse(QString input);
     // get productions in recursive decent
     QStringList get_recursive_descent_productions(){
         return recursive_descent_productions;

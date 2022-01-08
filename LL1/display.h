@@ -26,7 +26,7 @@ public:
     void extractFollowSet();
     void recursiveDescent(QString sentence);
     void showOutput(int id, QString sentence);
-    void showAnalysisTable(QString sentence);
+    void showAnalysisTable();
     void ll1_parse(QString sentence);
     Parser initParser();
 private:

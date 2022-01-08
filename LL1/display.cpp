@@ -1,5 +1,5 @@
 ﻿#include "display.h"
-
+#include "utils.h"
 Display::Display(QWidget *parent):QWidget(parent)
 {
     inputTitle = new QLabel(QString::fromLocal8Bit("输入"));
@@ -106,6 +106,10 @@ void Display::extractFollowSet(){
 
 
 void Display::recursiveDescent(QString sentence){
+    if(sentence == ""){
+        Utils::alert_message("input cannot be null", "error");
+        return;
+    }
     Grammar grammar;
     grammar.set_parser(initParser());
     grammar.extract_first_set();
@@ -114,14 +118,19 @@ void Display::recursiveDescent(QString sentence){
     LL1 ll1;
     ll1.set_grammar(grammar);
     ll1.recursive_descent(sentence);
+    if(!ll1.recursive_descent(sentence)){
+        Utils::alert_message("parse", "error");
+        return;
+    }
     QStringList productions = ll1.get_recursive_descent_productions();
     for(auto p: productions){
         outputList->insertPlainText(p);
     }
+    ll1.generate_grammar_tree("recursive_descent");
 }
 
 
-void Display::showAnalysisTable(QString sentence){
+void Display::showAnalysisTable(){
     Grammar grammar;
     grammar.set_parser(initParser());
     grammar.extract_first_set();
@@ -138,6 +147,10 @@ void Display::showAnalysisTable(QString sentence){
 
 
 void Display::ll1_parse(QString sentence){
+    if(sentence == ""){
+        Utils::alert_message("input cannot be null", "error");
+        return;
+    }
     Grammar grammar;
     grammar.set_parser(initParser());
     grammar.remove_left_recursion();
@@ -148,7 +161,10 @@ void Display::ll1_parse(QString sentence){
     LL1 ll1;
     ll1.set_grammar(grammar);
     ll1.generate_ll1_analysis_table();
-    ll1.parse(sentence);
+    if(ll1.parse(sentence)){
+        Utils::alert_message("parse", "error");
+        return;
+    }
     QStringList ll1_productions = ll1.get_ll1_productions();
     for(auto p: ll1_productions){
         outputList->insertPlainText(p);
@@ -157,6 +173,7 @@ void Display::ll1_parse(QString sentence){
     for(auto table_row : tables){
         analysisTable->setRow(table_row);
     }
+    ll1.generate_grammar_tree("ll1");
 }
 
 void Display::showOutput(int id, QString sentence){
@@ -179,7 +196,7 @@ void Display::showOutput(int id, QString sentence){
         recursiveDescent(sentence);
         break;
     case 5:
-        showAnalysisTable(sentence);
+        showAnalysisTable();
         break;
     case 6:
         break;

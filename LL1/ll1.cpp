@@ -1,6 +1,7 @@
 ﻿#include "ll1.h"
 #include <QFile>
 #include <QQueue>
+#include <QDir>
 /**
  * @brief LL1::set_grammar set grammar
  * @param grammar grammar
@@ -116,7 +117,7 @@ QStringList LL1::get_ll1_table(){
 }
 
 
-void LL1::parse(QString input){
+bool LL1::parse(QString input){
 
     // analysis stack
     analysis.push("#");
@@ -161,10 +162,7 @@ void LL1::parse(QString input){
             tree.push(new_child);
         }
     }
-    if(flag)
-        qDebug() << "error";
-    // print_right_first(ll1_tree);
-    generate_grammar_tree("ll1");
+    return flag;
 }
 
 void LL1::tranverse_right_first(GrammarTree* current_node){
@@ -215,20 +213,20 @@ void LL1::generate_grammar_tree(QString type){
             auto top = tree.front();
             tree.pop_front();
             if(tree_map[top->node] == 0){
-                tree_dot += QString::number(num) + "[label=\"" + top->node + "\";\n";
+                tree_dot += QString::number(num) + "[label=\"" + top->node + "\"];\n";
                 tree_map[top->node] = num++;
             }
-            for(int i = top->next_node.length() - 1; i >= 0; i--){
+            for(int i = 0; i < top->next_node.length(); i++){
                 tree.push_back(top->next_node[i]);
                 tree_dot += QString::number(num) + "[label=\"" + top->next_node[i]->node + "\"];\n";
                 tree_dot += QString::number(tree_map[top->node]) + "--" + QString::number(num) + ";\n";
-                tree_map[top->node] = num++;
+                tree_map[top->next_node[i]->node] = num++;
             }
         }
     }
     tree_dot += "}";
-
-    QFile file("G:\\programs\\QT\\compile\\build-LL1-Desktop_Qt_5_9_9_MSVC2017_64bit-Debug\\debug\\dot\\result.dot");
+    qDebug() << QDir::currentPath();
+    QFile file("./dot/result.dot");
     if(file.open(QFile::WriteOnly | QFile::Truncate))
     {
         qDebug() << 666;
@@ -236,8 +234,8 @@ void LL1::generate_grammar_tree(QString type){
         out << tree_dot;
     }
     file.close();
-    system("dot ./dot/result.dot -T png -o result.png");
-    qDebug() << tree_dot;
+    system(".\\Graphviz\\dot.exe -Tpng .\\dot\\result.dot -o .\\dot\\result.png");
+    system(".\\dot\\result.png");
 }
 
 
