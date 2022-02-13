@@ -354,9 +354,6 @@ bool Grammar::add_first_set(QString left, QString right){
  * @brief Grammar::extract_first_set get first set
  */
 QStringList Grammar::extract_first_set(){
-    // TODO
-    // There is a question here.
-    // the first set of G should contain "@"?
     first["@"].insert("@");
 
     // non-terminator
@@ -392,18 +389,16 @@ QStringList Grammar::extract_candidate_first_set(){
                 continue;
             QStringList candidate_list = it->split(" ");
             for(int i = 0, s = candidate_list.length(); i < s; i++){
+                // union
                 first_candidate[*it].unite(first[candidate_list[i]]);
                 if(!first[candidate_list[i]].contains("@")){
                     if(first_candidate[*it].contains("@"))
                         first_candidate[*it].remove("@");
                     break;
                 }
-
-
             }
         }
     }
-
 
     QStringList first_candidate_set;
     for(auto vn: parser.VN){

@@ -20,6 +20,7 @@ public:
     void deleteById(int id);
     void addInputItem(QString left, QString right);
     QStringList getInput();
+    void clearList() {productions.clear(); clear();}
 public slots:
     void clickAddItem();
 private:

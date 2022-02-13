@@ -33,7 +33,7 @@ public:
 
     // parse
     bool parse_file();
-    void parse_input(QStringList input_list, QString start="E");
+    void parse_input(QStringList input_list, QString start);
 
     // set file name
     void set_file_name(QString file_name);

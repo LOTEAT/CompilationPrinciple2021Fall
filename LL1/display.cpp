@@ -55,13 +55,25 @@ Parser Display::initParser(){
     QStringList input_list = inputList->getInput();
     QString str=QString(input_list[0][0]);  //默认第一个字符为起始符
     Parser parser;
-    parser.parse_input(input_list,str);
+    parser.parse_input(input_list, str);
     return parser;
 }
 
-void Display::removeLeftRecursion(){
+Parser Display::initParser(QString start){
+    QStringList input_list = inputList->getInput();
+    Parser parser;
+    parser.parse_input(input_list, start);
+    return parser;
+}
+
+void Display::removeLeftRecursion(QString start){
     Grammar grammar;
-    grammar.set_parser(initParser());
+    if(start == ""){
+        grammar.set_parser(initParser());
+    }
+    else{
+        grammar.set_parser(initParser(start));
+    }
     QStringList productions = grammar.remove_left_recursion();
     for(auto production: productions){
         outputList->insertPlainText(production);
@@ -93,9 +105,13 @@ void Display::extractFirstSet(){
 }
 
 
-void Display::extractFollowSet(){
+void Display::extractFollowSet(QString start){
+    if(start == ""){
+        Utils::alert_message("start cannot be null", "error");
+        return;
+    }
     Grammar grammar;
-    grammar.set_parser(initParser());
+    grammar.set_parser(initParser(start));
     grammar.extract_first_set();
     grammar.extract_candidate_first_set();
     QStringList follow_set = grammar.extract_follow_set();
@@ -105,19 +121,18 @@ void Display::extractFollowSet(){
 }
 
 
-void Display::recursiveDescent(QString sentence){
-    if(sentence == ""){
-        Utils::alert_message("input cannot be null", "error");
+void Display::recursiveDescent(QString sentence, QString start){
+    if(sentence == "" || start == ""){
+        Utils::alert_message("input or start cannot be null", "error");
         return;
     }
     Grammar grammar;
-    grammar.set_parser(initParser());
+    grammar.set_parser(initParser(start));
     grammar.extract_first_set();
     grammar.extract_candidate_first_set();
     grammar.extract_follow_set();
     LL1 ll1;
     ll1.set_grammar(grammar);
-    ll1.recursive_descent(sentence);
     if(!ll1.recursive_descent(sentence)){
         Utils::alert_message("parse", "error");
         return;
@@ -146,13 +161,13 @@ void Display::showAnalysisTable(){
 }
 
 
-void Display::ll1_parse(QString sentence){
-    if(sentence == ""){
-        Utils::alert_message("input cannot be null", "error");
+void Display::ll1_parse(QString sentence, QString start){
+    if(sentence == "" || start == ""){
+        Utils::alert_message("input or start cannot be null", "error");
         return;
     }
     Grammar grammar;
-    grammar.set_parser(initParser());
+    grammar.set_parser(initParser(start));
     grammar.remove_left_recursion();
     grammar.extract_left_common_factor();
     grammar.extract_first_set();
@@ -176,12 +191,12 @@ void Display::ll1_parse(QString sentence){
     ll1.generate_grammar_tree("ll1");
 }
 
-void Display::showOutput(int id, QString sentence){
-    qDebug() << id;
+void Display::showOutput(int id, QString sentence, QString start){
+    clearTable();
     outputList->clear();
     switch (id) {
     case 0:
-        removeLeftRecursion();
+        removeLeftRecursion(start);
         break;
     case 1:
         extractLeftCommonFactor();
@@ -190,18 +205,16 @@ void Display::showOutput(int id, QString sentence){
         extractFirstSet();
         break;
     case 3:
-        extractFollowSet();
+        extractFollowSet(start);
         break;
     case 4:
-        recursiveDescent(sentence);
+        recursiveDescent(sentence, start);
         break;
     case 5:
         showAnalysisTable();
         break;
     case 6:
-        break;
-    case 7:
-        ll1_parse(sentence);
+        ll1_parse(sentence, start);
         break;
     }
 }

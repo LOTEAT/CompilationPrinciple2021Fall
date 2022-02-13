@@ -15,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent)
     experimentTitle = new QLabel(QString::fromLocal8Bit("消除左递归算法"));
     experimentTitle->setFont(subTitleFont);
     inputString = new QLabel(QString::fromLocal8Bit("输入串"));
+    begin = new QLabel(QString::fromLocal8Bit("起始符"));
+    pattern = new QLabel(QString::fromLocal8Bit("句型"));
 
     horizontalLine = new QFrame(this);
     horizontalLine->setFrameShape(QFrame::HLine);
@@ -24,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     QStringList experimentSelectNames = {QString::fromLocal8Bit("算法 2.1："), QString::fromLocal8Bit("算法 2.2："),
                                          QString::fromLocal8Bit("算法 2.3："), QString::fromLocal8Bit("算法 2.4："),
                                          QString::fromLocal8Bit("算法 2.5："), QString::fromLocal8Bit("算法 2.6："),
-                                         QString::fromLocal8Bit("算法 2.7："), QString::fromLocal8Bit("综合实验")};
+                                         QString::fromLocal8Bit("综合实验")};
 
 
     experimentSelect->addItems(experimentSelectNames);
@@ -54,11 +56,16 @@ MainWindow::MainWindow(QWidget *parent)
     pictureBtn->setStyleSheet("QPushButton{border:none;} "
                               "QPushButton:hover{background-color: rgb(224,224,224);}");
     pictureBtn->setEnabled(false);
+    connect(pictureBtn, SIGNAL(clicked()), this, SLOT(clickPictureBtn()));
 
-    inputStringEdit = new QLineEdit();
-    inputStringEdit->setMaximumWidth(0);
+    beginEdit = new QLineEdit();
+    patternEdit = new QLineEdit();
+    beginEdit->setMaximumWidth(0);
+    patternEdit->setMaximumWidth(0);
 
     display = new Display();
+
+    picture = new PictureDialog();
 
     QHBoxLayout* subTitleLayout = new QHBoxLayout();
     subTitleLayout->addWidget(experimentSelect);
@@ -69,7 +76,10 @@ MainWindow::MainWindow(QWidget *parent)
     QHBoxLayout* controlLayout = new QHBoxLayout();
     controlLayout->addWidget(importBtn);
     controlLayout->addStretch();
-    controlLayout->addWidget(inputStringEdit);
+    controlLayout->addWidget(begin);
+    controlLayout->addWidget(beginEdit);
+    controlLayout->addWidget(pattern);
+    controlLayout->addWidget(patternEdit);
     controlLayout->addWidget(confirmBtn);
     controlLayout->addStretch();
     controlLayout->addWidget(pictureBtn);
@@ -97,51 +107,63 @@ void MainWindow::experimentChanged(int index)
     QString experimentNames[] = {QString::fromLocal8Bit("消除左递归算法"),QString::fromLocal8Bit("提取公共左因子法"),
                                  QString::fromLocal8Bit("FIRST 集合构造算法"),QString::fromLocal8Bit("FOLLOW 集合构造算法"),
                                 QString::fromLocal8Bit("递归下降分析程序构造算法"),QString::fromLocal8Bit("LL(1)分析表生成算法"),
-                                 QString::fromLocal8Bit("预测分析程序构造算法"),
                                  QString::fromLocal8Bit("基于 LL(1)预测分析法的语法分析程序生成器")};
     experimentTitle->setText(experimentNames[index]);
-    inputStringEdit->clear();
-    inputStringEdit->setMaximumWidth(0);
+    beginEdit->clear();
+    begin->setMaximumWidth(0);
+    beginEdit->setMaximumWidth(0);
+    patternEdit->clear();
+    pattern->setMaximumWidth(0);
+    patternEdit->setMaximumWidth(0);
     importBtn->setEnabled(true);
     pictureBtn->setEnabled(false);
+    display->clearTable();
+
 
     switch (index) {
     case 0:
+        begin->setMaximumWidth(QWIDGETSIZE_MAX);
+        beginEdit->setMaximumWidth(QWIDGETSIZE_MAX);
         display->setText(QString::fromLocal8Bit("文法产生式"), "", QString::fromLocal8Bit("消除左递归后的等价文法产生式"));
         break;
     case 1:
-        display->setText(QString::fromLocal8Bit("文法产生式"), "", QString::fromLocal8Bit("消除左递归后的等价文法产生式"));
+        display->setText(QString::fromLocal8Bit("文法产生式"), "", QString::fromLocal8Bit("提取公共左因子"));
         break;
     case 2:
         display->setText(QString::fromLocal8Bit("文法产生式"), "", QString::fromLocal8Bit("所有候选式的FIRST集合"));
         break;
     case 3:
+        begin->setMaximumWidth(QWIDGETSIZE_MAX);
+        beginEdit->setMaximumWidth(QWIDGETSIZE_MAX);
         display->setText(QString::fromLocal8Bit("文法产生式"), "", QString::fromLocal8Bit("所有非终结符的FOLLOW集合"));
         break;
     case 4:
         display->setText(QString::fromLocal8Bit("LL(1)文法产生式"), "", QString::fromLocal8Bit("推导过程所用产生式"));
-        inputStringEdit->setMaximumWidth(QWIDGETSIZE_MAX);
+        begin->setMaximumWidth(QWIDGETSIZE_MAX);
+        beginEdit->setMaximumWidth(QWIDGETSIZE_MAX);
+        pattern->setMaximumWidth(QWIDGETSIZE_MAX);
+        patternEdit->setMaximumWidth(QWIDGETSIZE_MAX);
         pictureBtn->setEnabled(true);
         break;
     case 5:
         display->setText(QString::fromLocal8Bit("LL(1)文法产生式"), QString::fromLocal8Bit("LL(1)分析表"), "");
+        begin->setMaximumWidth(QWIDGETSIZE_MAX);
+        beginEdit->setMaximumWidth(QWIDGETSIZE_MAX);
         break;
     case 6:
-        display->setText("", QString::fromLocal8Bit("LL(1)分析表"), QString::fromLocal8Bit("推导过程所用产生式"));
-        inputStringEdit->setMaximumWidth(QWIDGETSIZE_MAX);
-        importBtn->setEnabled(false);
-        pictureBtn->setEnabled(true);
-        break;
-    case 7:
         display->setText(QString::fromLocal8Bit("上下文无关文法"), QString::fromLocal8Bit("LL(1)分析表"), QString::fromLocal8Bit("推导过程所用产生式"));
-        inputStringEdit->setMaximumWidth(QWIDGETSIZE_MAX);
+        pattern->setMaximumWidth(QWIDGETSIZE_MAX);
+        patternEdit->setMaximumWidth(QWIDGETSIZE_MAX);
+        begin->setMaximumWidth(QWIDGETSIZE_MAX);
+        beginEdit->setMaximumWidth(QWIDGETSIZE_MAX);
         pictureBtn->setEnabled(true);
         break;
     }
 }
 
 void MainWindow::clickImportBtn(){
-    this->file_name = QFileDialog::getOpenFileName(this, "Open file","G:/programs/QT/compile/LL1/test","Text files (*.txt)");
+    display->clearInput();
+    this->file_name = QFileDialog::getOpenFileName(this, "Open file","./test","Text files (*.txt)");
     QFile ll1_file(file_name);
 
     /***********TODO*************/
@@ -169,6 +191,10 @@ void MainWindow::clickImportBtn(){
 
 void MainWindow::clickConfirmBtn(){
     int id = experimentSelect->currentIndex();
-    display->showOutput(id, inputStringEdit->text());
+    display->showOutput(id, patternEdit->text(), beginEdit->text());
+}
+
+void MainWindow::clickPictureBtn(){
+    picture->showPic();
 }
 

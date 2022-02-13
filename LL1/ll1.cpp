@@ -19,6 +19,7 @@ void LL1::set_grammar(Grammar grammar){
 void LL1::sub_program(QString left, QStringList input_list, GrammarTree* current_node){
     if(parse_index == input_list.length()){
         if(grammar.first[left].contains("@")){
+            // make grammar tree
             recursive_descent_productions.push_back(left + "->@\n");
             current_node->next_node.push_back(new GrammarTree("@"));
         }
@@ -26,6 +27,7 @@ void LL1::sub_program(QString left, QStringList input_list, GrammarTree* current
             is_parse_success = false;
         return;
     }
+    // advance
     if(grammar.parser.VT.contains(left) && left == input_list[parse_index]){
         parse_index++;
         return;
@@ -38,6 +40,7 @@ void LL1::sub_program(QString left, QStringList input_list, GrammarTree* current
             recursive_descent_productions.push_back(p.replace(" ", ""));
             QStringList right_list = candidate.split(" ");
             for(auto right_part: right_list){
+                // advance
                 if(grammar.parser.VT.contains(right_part) && right_part == input_list[parse_index]){
                     current_node->next_node.push_back(new GrammarTree(right_part));
                     parse_index++;
@@ -51,8 +54,10 @@ void LL1::sub_program(QString left, QStringList input_list, GrammarTree* current
             break;
         }
     }
-    if(grammar.first[left].contains("@") && (parse_index == input_list.length() || grammar.follow[left].contains(input_list[parse_index])) && flag){
+    if(grammar.first[left].contains("@") && (parse_index == input_list.length() ||
+       grammar.follow[left].contains(input_list[parse_index])) && flag){
         recursive_descent_productions.push_back(left + "->@\n");
+        // make grammar tree
         current_node->next_node.push_back(new GrammarTree("@"));
     }
 }
@@ -208,6 +213,7 @@ void LL1::generate_grammar_tree(QString type){
         }
     }
     else{
+        qDebug() << 666;
         tree.push_back(recursive_descent_tree);
         while(!tree.empty()){
             auto top = tree.front();
@@ -235,7 +241,6 @@ void LL1::generate_grammar_tree(QString type){
     }
     file.close();
     system(".\\Graphviz\\dot.exe -Tpng .\\dot\\result.dot -o .\\dot\\result.png");
-    system(".\\dot\\result.png");
 }
 
 

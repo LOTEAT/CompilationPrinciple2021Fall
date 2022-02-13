@@ -10,6 +10,7 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include "display.h"
+#include "picturedialog.h"
 
 
 class MainWindow : public QMainWindow
@@ -23,19 +24,23 @@ public slots:
     void experimentChanged(int index);
     void clickImportBtn();
     void clickConfirmBtn();
+    void clickPictureBtn();
 private:
     QString file_name = "";
     QLabel* title;
     QLabel* author;
     QLabel* experimentTitle;
     QLabel* inputString;
+    QLabel* begin;
+    QLabel* pattern;
     QPushButton* importBtn;
     QPushButton* confirmBtn;
     QPushButton* pictureBtn;
-    QLineEdit* inputStringEdit;
+    QLineEdit* beginEdit;
+    QLineEdit* patternEdit;
     QFrame* horizontalLine;
     QComboBox* experimentSelect;
     Display* display;
-
+    PictureDialog* picture;
 };
 #endif // MAINWINDOW_H

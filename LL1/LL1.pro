@@ -25,6 +25,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     parser.cpp \
+    picturedialog.cpp \
     utils.cpp \
     treenode.cpp
 
@@ -37,6 +38,7 @@ HEADERS += \
     ll1.h \
     mainwindow.h \
     parser.h \
+    picturedialog.h \
     utils.h \
     treenode.h \
     production.h

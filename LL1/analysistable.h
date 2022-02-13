@@ -22,6 +22,7 @@ public slots:
     void addCol();
     void subRow();
     void subCol();
+    void clear() {table->clear();table->setRowCount(0);table->setColumnCount(0);}
 private:
     QTableWidget* table;
     QWidget* controlWidget;

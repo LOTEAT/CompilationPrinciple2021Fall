@@ -20,15 +20,18 @@ public:
     Display(QWidget* parent = nullptr);
     void setText(const QString& input, const QString& table, const QString& output);
     void addInputItem(QString left, QString right);
-    void removeLeftRecursion();
+    void removeLeftRecursion(QString start);
     void extractLeftCommonFactor();
     void extractFirstSet();
-    void extractFollowSet();
-    void recursiveDescent(QString sentence);
-    void showOutput(int id, QString sentence);
+    void extractFollowSet(QString start);
+    void recursiveDescent(QString sentence, QString start);
+    void showOutput(int id, QString sentence, QString start);
     void showAnalysisTable();
-    void ll1_parse(QString sentence);
+    void ll1_parse(QString sentence, QString start);
+    void clearInput() {inputList->clearList();}
+    void clearTable() {analysisTable->clear();}
     Parser initParser();
+    Parser initParser(QString start);
 private:
     QLabel* inputTitle;
     QLabel* tableTitle;
