@@ -1,0 +1,220 @@
+﻿#include "display.h"
+#include "utils.h"
+Display::Display(QWidget *parent):QWidget(parent)
+{
+    inputTitle = new QLabel(QString::fromLocal8Bit("输入"));
+    tableTitle = new QLabel("");
+    outputTitle = new QLabel(QString::fromLocal8Bit("输出"));
+
+    inputList = new InputList();
+    outputList = new QPlainTextEdit();
+    outputList->setReadOnly(true);
+    outputList->setStyleSheet("border:1px solid #DCDFE6; border-radius: 6px; background-color: #F8F8F8;");
+
+    analysisTable = new AnalysisTable();
+    analysisTable->setMaximumWidth(0);
+
+    QVBoxLayout* inputLayout = new QVBoxLayout();
+    inputLayout->addWidget(inputTitle, 0, Qt::AlignHCenter);
+    inputLayout->addWidget(inputList);
+
+    QVBoxLayout* tableLayout = new QVBoxLayout();
+    tableLayout->addWidget(tableTitle, 0, Qt::AlignHCenter);
+    tableLayout->addWidget(analysisTable);
+
+    QVBoxLayout* outputLayout = new QVBoxLayout();
+    outputLayout->addWidget(outputTitle, 0, Qt::AlignHCenter);
+    outputLayout->addWidget(outputList);
+
+    QHBoxLayout* layout = new QHBoxLayout();
+    layout->addLayout(inputLayout);
+    layout->addLayout(tableLayout);
+    layout->addLayout(outputLayout);
+    setLayout(layout);
+}
+
+void Display::setText(const QString& input, const QString& table, const QString& output)
+{
+    inputTitle->setText(input);
+    tableTitle->setText(table);
+    outputTitle->setText(output);
+    inputList->setHidden(!input.length());
+    analysisTable->setHidden(!table.length());
+    analysisTable->setControl(!input.length() && table.length());
+    outputList->setMaximumWidth(output.length() ? QWIDGETSIZE_MAX : 0);
+    outputList->clear();
+}
+
+
+void Display::addInputItem(QString left, QString right){
+    inputList->addInputItem(left, right);
+}
+
+
+Parser Display::initParser(){
+    QStringList input_list = inputList->getInput();
+    QString str=QString(input_list[0][0]);  //默认第一个字符为起始符
+    Parser parser;
+    parser.parse_input(input_list, str);
+    return parser;
+}
+
+Parser Display::initParser(QString start){
+    QStringList input_list = inputList->getInput();
+    Parser parser;
+    parser.parse_input(input_list, start);
+    return parser;
+}
+
+void Display::removeLeftRecursion(QString start){
+    Grammar grammar;
+    if(start == ""){
+        grammar.set_parser(initParser());
+    }
+    else{
+        grammar.set_parser(initParser(start));
+    }
+    QStringList productions = grammar.remove_left_recursion();
+    for(auto production: productions){
+        outputList->insertPlainText(production);
+    }
+}
+
+
+void Display::extractLeftCommonFactor(){
+    Grammar grammar;
+    grammar.set_parser(initParser());
+    QStringList productions = grammar.extract_left_common_factor();
+    for(auto production: productions){
+        outputList->insertPlainText(production);
+    }
+
+}
+
+void Display::extractFirstSet(){
+    Grammar grammar;
+    grammar.set_parser(initParser());
+    QStringList first_set = grammar.extract_first_set();
+    for(auto first: first_set){
+        outputList->insertPlainText(first);
+    }
+    QStringList first_candidate_set = grammar.extract_candidate_first_set();
+    for(auto first_candidate: first_candidate_set){
+        outputList->insertPlainText(first_candidate);
+    }
+}
+
+
+void Display::extractFollowSet(QString start){
+    if(start == ""){
+        Utils::alert_message("start cannot be null", "error");
+        return;
+    }
+    Grammar grammar;
+    grammar.set_parser(initParser(start));
+    grammar.extract_first_set();
+    grammar.extract_candidate_first_set();
+    QStringList follow_set = grammar.extract_follow_set();
+    for(auto follow: follow_set){
+        outputList->insertPlainText(follow);
+    }
+}
+
+
+void Display::recursiveDescent(QString sentence, QString start){
+    if(sentence == "" || start == ""){
+        Utils::alert_message("input or start cannot be null", "error");
+        return;
+    }
+    Grammar grammar;
+    grammar.set_parser(initParser(start));
+    grammar.extract_first_set();
+    grammar.extract_candidate_first_set();
+    grammar.extract_follow_set();
+    LL1 ll1;
+    ll1.set_grammar(grammar);
+    if(!ll1.recursive_descent(sentence)){
+        Utils::alert_message("parse", "error");
+        return;
+    }
+    QStringList productions = ll1.get_recursive_descent_productions();
+    for(auto p: productions){
+        outputList->insertPlainText(p);
+    }
+    ll1.generate_grammar_tree("recursive_descent");
+}
+
+
+void Display::showAnalysisTable(){
+    Grammar grammar;
+    grammar.set_parser(initParser());
+    grammar.extract_first_set();
+    grammar.extract_candidate_first_set();
+    grammar.extract_follow_set();
+    LL1 ll1;
+    ll1.set_grammar(grammar);
+    ll1.generate_ll1_analysis_table();
+    QStringList tables = ll1.get_ll1_table();
+    for(auto table_row : tables){
+        analysisTable->setRow(table_row);
+    }
+}
+
+
+void Display::ll1_parse(QString sentence, QString start){
+    if(sentence == "" || start == ""){
+        Utils::alert_message("input or start cannot be null", "error");
+        return;
+    }
+    Grammar grammar;
+    grammar.set_parser(initParser(start));
+    grammar.remove_left_recursion();
+    grammar.extract_left_common_factor();
+    grammar.extract_first_set();
+    grammar.extract_candidate_first_set();
+    grammar.extract_follow_set();
+    LL1 ll1;
+    ll1.set_grammar(grammar);
+    ll1.generate_ll1_analysis_table();
+    if(ll1.parse(sentence)){
+        Utils::alert_message("parse", "error");
+        return;
+    }
+    QStringList ll1_productions = ll1.get_ll1_productions();
+    for(auto p: ll1_productions){
+        outputList->insertPlainText(p);
+    }
+    QStringList tables = ll1.get_ll1_table();
+    for(auto table_row : tables){
+        analysisTable->setRow(table_row);
+    }
+    ll1.generate_grammar_tree("ll1");
+}
+
+void Display::showOutput(int id, QString sentence, QString start){
+    clearTable();
+    outputList->clear();
+    switch (id) {
+    case 0:
+        removeLeftRecursion(start);
+        break;
+    case 1:
+        extractLeftCommonFactor();
+        break;
+    case 2:
+        extractFirstSet();
+        break;
+    case 3:
+        extractFollowSet(start);
+        break;
+    case 4:
+        recursiveDescent(sentence, start);
+        break;
+    case 5:
+        showAnalysisTable();
+        break;
+    case 6:
+        ll1_parse(sentence, start);
+        break;
+    }
+}
